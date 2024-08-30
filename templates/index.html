@@ -1,0 +1,187 @@
+<head>
+	<script src="https://www.gstatic.com/firebasejs/5.4.0/firebase.js"></script>
+	<script src="https://cdn.jsdelivr.net/npm/moment@2.29.1/min/moment.min.js"></script>
+	<script src="https://cdn.jsdelivr.net/npm/chart.js@2.9.4"></script>
+	<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-streaming@1.9.0"></script>
+</head>
+
+<body>
+	<div>
+		<canvas id="myChart"></canvas>
+
+	</div>
+    
+	<script>
+		var chartColors = {
+			red: 'rgb(255, 99, 132)',
+			orange: 'rgb(255, 159, 64)',
+			yellow: 'rgb(255, 205, 86)',
+			green: 'rgb(75, 192, 192)',
+			blue: 'rgb(54, 162, 235)',
+			purple: 'rgb(153, 102, 255)',
+			grey: 'rgb(201, 203, 207)'
+		};
+
+
+		var color = Chart.helpers.color;
+		var config = {
+			type: 'line',
+			data: {
+
+				datasets: [{
+					label: 'Nhiệt độ(°C)',
+					backgroundColor: color(chartColors.red).alpha(0.5).rgbString(),
+					borderColor: chartColors.red,
+					fill: false,
+					lineTension: 0,
+					cubicInterpolationMode: 'monotone',
+					borderDash: [8, 4], //icon
+					data: []
+				},
+                {
+					label: 'Độ ẩm(%)',
+					backgroundColor: color(chartColors.blue).alpha(0.5).rgbString(),
+					borderColor: chartColors.blue,
+					fill: false,
+					lineTension: 0,
+					cubicInterpolationMode: 'monotone',
+					borderDash: [8, 4], //icon
+					data: []
+				},
+                {
+					label: 'lượng mưa(cm)',
+					backgroundColor: color(chartColors.purple).alpha(0.5).rgbString(),
+					borderColor: chartColors.purple,
+					fill: false,
+					lineTension: 0,
+					cubicInterpolationMode: 'monotone',
+					borderDash: [8, 4], //icon
+					data: []
+				}]
+			},
+
+			options: {
+				title: {
+					display: true,
+				},
+				scales: {
+					xAxes: [{
+						type: 'realtime',
+						realtime: {
+							duration: 200000,
+							refresh: 5000,
+							delay: 2000,
+							onRefresh: onRefresh
+						}
+					}],
+					yAxes: [{
+						scaleLabel: {
+                            display: true,
+                           	}
+                    
+					}
+                    ]
+				},
+				tooltips: {
+					mode: 'nearest',
+					intersect: false
+				},
+				hover: {
+					mode: 'nearest',
+					intersect: false
+				}
+			}
+		};
+
+		window.onload = function () {
+			var ctx = document.getElementById('myChart').getContext('2d');
+			window.myChart = new Chart(ctx, config);
+		};
+
+
+
+
+
+
+
+		var fb = {
+
+            apiKey: "AIzaSyBfoC8pByFL8ULmxInIoWHCcQTvfN75PNk",
+            authDomain: "minipro1-6178f.firebaseapp.com",
+            databaseURL: "https://minipro1-6178f-default-rtdb.firebaseio.com",
+            projectId: "minipro1-6178f",
+            storageBucket: "minipro1-6178f.appspot.com",
+            messagingSenderId: "35900511053",
+		};
+
+		firebase.initializeApp(fb);
+		var data_obj0 = 0;
+        var data_obj1 = 0;
+        var data_obj2 = 0;
+
+		function getPost() {
+			x0 = firebase.database().ref('/temp/obj0');
+			x0.once('value', function (messages) {
+				result = messages.val();
+
+				console.log(result);
+
+				data_obj0 = result;
+			});
+            x1 = firebase.database().ref('/humidity/obj1');
+		    x1.once('value', function (messages) {
+				result = messages.val();
+
+				console.log(result);
+
+				data_obj1 = result;
+			});
+            x2 = firebase.database().ref('/rain/obj2');
+			x2.once('value', function (messages) {
+				result = messages.val();
+
+				console.log(result);
+
+				data_obj2 = result;
+			});
+
+	
+		}
+		setInterval(function () {
+			getPost();
+			data_obj0;
+            data_obj1;
+            data_obj2;
+		}, 1000)
+
+
+
+		function getData_Obj0() {
+			return data_obj0;
+		}
+        function getData_Obj1() {
+			return data_obj1;
+		}
+        function getData_Obj2() {
+			return data_obj2;
+		}
+
+		function onRefresh(chart) {
+			var now = Date.now();
+			chart.data.datasets[0].data.push({
+				x: now,
+				y: getData_Obj0()
+			});
+
+            chart.data.datasets[1].data.push({
+				x: now,
+				y: getData_Obj1()
+			});
+
+            chart.data.datasets[2].data.push({
+				x: now,
+				y: getData_Obj2()
+			});
+		}
+	</script>
+</body>
